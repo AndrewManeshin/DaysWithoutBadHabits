@@ -1,6 +1,5 @@
 package com.example.dayswithoutbadhabits
 
-import android.opengl.Visibility
 import android.view.View
 import android.widget.Button
 import android.widget.TextView

@@ -9,7 +9,7 @@ class MainViewModelTest {
 
     @Test
     fun `test 0 days and reinit`() {
-        val repository = FakeRepository(0)
+        val repository = FakeRepository.Base(0)
         val communication = FakeMainCommunication.Base()
         val viewModel = MainViewModel(repository, communication)
         viewModel.init(isFirstRun = true)
@@ -24,7 +24,7 @@ class MainViewModelTest {
 
     @Test
     fun `test N days and reinit`() {
-        val repository = FakeRepository(5)
+        val repository = FakeRepository.Base(5)
         val communication = FakeMainCommunication.Base()
         val viewModel = MainViewModel(repository, communication)
 
@@ -37,14 +37,44 @@ class MainViewModelTest {
 
         assertEquals(true, communication.checkCalledCounts(1))
     }
+
+    @Test
+    fun `test reset`() {
+        val repository = FakeRepository.Base(5)
+        val communication = FakeMainCommunication.Base()
+        val viewModel = MainViewModel(repository, communication)
+
+        viewModel.init(true)
+        assertEquals(true, communication.checkCalledCounts(1))
+        assertEquals(true, communication.isSame(UiState.NDays(days = 5)))
+
+        viewModel.reset()
+        assertEquals(true, repository.resetCalledCount(2))
+        assertEquals(true, communication.checkCalledCounts(2))
+        assertEquals(true, communication.isSame(UiState.NDays(days = 0)))
+    }
 }
 
-private class FakeRepository(
-    private val days: Int
-) : MainRepository {
+private interface FakeRepository : MainRepository {
 
-    override fun days() = days
+    fun resetCalledCount(count: Int): Boolean
+
+    class Base(
+        private val days: Int
+    ) : FakeRepository {
+
+        private var resetCalledCount = 0
+
+        override fun resetCalledCount(count: Int) = count == resetCalledCount
+
+        override fun reset() {
+            resetCalledCount++
+        }
+
+        override fun days() = days
+    }
 }
+
 
 private interface FakeMainCommunication : MainCommunication.Mutable {
 
