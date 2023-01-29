@@ -22,6 +22,11 @@ class MainViewModel(
         }
     }
 
+    fun reset() {
+        repository.reset()
+        communication.put(UiState.ZeroDays)
+    }
+
     override fun observe(owner: LifecycleOwner, observer: Observer<UiState>) =
         communication.observe(owner, observer)
 }
@@ -72,4 +77,5 @@ interface MainCommunication {
 interface MainRepository {
 
     fun days(): Int
+    fun reset()
 }
