@@ -22,10 +22,10 @@ class MainRepositoryTest {
         val now = FakeNow.Base()
         val day = 24 * 3600 * 1000
         cacheDataSource.save(2L * day)
-        now.addTime(7L * day)
+        now.addTime(9L * day)
         val repository = MainRepository.Base(cacheDataSource, now)
         val actual = repository.days()
-        val expected = 7L
+        val expected = 7
         assertEquals(expected, actual)
     }
 
