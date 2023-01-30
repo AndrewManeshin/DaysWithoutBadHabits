@@ -9,11 +9,11 @@ class App : Application(), ProvideViewModel {
 
     override fun onCreate() {
         super.onCreate()
-        val sharedPref = if (BuildConfig.DEBUG) SharedPref.Test() else SharedPref.Base()
+        val sharedPref = SharedPref.Factory(BuildConfig.DEBUG).make(this)
         viewModel = MainViewModel(
             MainRepository.Base(
                 CacheDataSource.Base(
-                    sharedPref.make(this)
+                    sharedPref
                 ), Now.Base()
             ),
             MainCommunication.Base(MutableLiveData())
