@@ -1,18 +1,55 @@
 package com.example.dayswithoutbadhabits.domain
 
-interface NewMainInteractor : ResetCard {
-
-    fun cards(): List<Card>
+interface NewMainInteractor : CRUDCards {
 
     fun canAddNewCard(): Boolean
 
-    fun newCard(text: String): Card
 
-    fun deleteCard(id: Long)
+    class Base(
+        private val repository: Repository,
+        private val maxItemsCount: Int
+    ) : NewMainInteractor {
+        override fun cards(): List<Card> {
+            val cards = repository.cards()
+            return if (cards.size < maxItemsCount)
+                mutableListOf<Card>().apply {
+                    addAll(cards)
+                    add(Card.Add)
+                }
+            else cards
+        }
 
-    fun updateCard(id: Long, newText: String)
+        override fun canAddNewCard(): Boolean {
+            val cards = repository.cards()
+            return cards.size < maxItemsCount
+        }
+
+        override fun newCard(text: String): Card {
+            return repository.newCard(text)
+        }
+
+        override fun deleteCard(id: Long) {
+            repository.deleteCard(id)
+        }
+
+        override fun updateCard(id: Long, newText: String) {
+            repository.updateCard(id, newText)
+        }
+
+        override fun resetCard(id: Long) {
+            repository.resetCard(id)
+        }
+    }
 }
 
 interface ResetCard {
     fun resetCard(id: Long)
+}
+
+interface CRUDCards : ResetCard {
+
+    fun newCard(text: String): Card
+    fun cards(): List<Card>
+    fun updateCard(id: Long, newText: String)
+    fun deleteCard(id: Long)
 }
