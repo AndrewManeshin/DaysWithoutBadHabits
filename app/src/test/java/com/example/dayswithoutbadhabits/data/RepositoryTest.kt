@@ -52,7 +52,7 @@ class RepositoryTest : BaseTest() {
         now.addTime(sevenDays)
         val cacheDataSource = FakeCacheDataSource(
             listOf(
-                CardCache(id = 0L, countStartTime = 0L text = "a")
+                CardCache(id = 0L, countStartTime = 0L, text = "a")
             )
         )
         val repository = NewRepository(cacheDataSource, now)
@@ -122,7 +122,7 @@ class RepositoryTest : BaseTest() {
         expected = listOf(Card.ZeroDays(id = 0L, text = "a"))
         assertEquals(expected, actual)
         assertEquals(
-            CacheCard(id = 0L, countStartTime = sevenDays, text = "a"), cacheDataSource.cards()[0]
+            CardCache(id = 0L, countStartTime = sevenDays, text = "a"), cacheDataSource.cards()[0]
         )
     }
 }
@@ -131,7 +131,7 @@ private class FakeCacheDataSource(
     private val list: List<CardCache>
 ) : NewCacheDataSource {
 
-    private val cards = ArrayList<CardCache>
+    private val cards = ArrayList<CardCache>()
 
     init {
         cards.addAll(list)
@@ -142,26 +142,26 @@ private class FakeCacheDataSource(
     }
 
     override fun addCard(id: Long, text: String) {
-        val card = CardCache(id = id, text = text)
+        val card = CardCache(id = id, countStartTime = id, text = text)
         cards.add(card)
     }
 
     override fun updateCard(id: Long, text: String) {
-        val card = cards.find { it.id == id }
+        val card = cards.find { it.same(id) }
         val index = cards.indexOf(card)
-        val new = card.updateText(newText = text)
+        val new = card!!.updateText(newText = text)
         cards.set(index, new)
     }
 
     override fun deleteCard(id: Long) {
-        val card = cards.find { it.id == id }
+        val card = cards.find { it.same(id) }
         cards.remove(card)
     }
 
     override fun resetCard(id: Long, countStartTime: Long) {
-        val card = cards.find { it.id == id }
+        val card = cards.find { it.same(id) }
         val index = cards.indexOf(card)
-        val new = card.updateCountStartTime(countStartTime = countStartTime)
+        val new = card!!.updateCountStartTime(countStartTime = countStartTime)
         cards.set(index, new)
     }
 }
