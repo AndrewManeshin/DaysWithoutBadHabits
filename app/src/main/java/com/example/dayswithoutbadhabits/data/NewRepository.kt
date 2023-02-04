@@ -11,25 +11,40 @@ class NewRepository(
 ) : CRUDCards {
 
     override fun resetCard(id: Long) {
-        cacheDataSource.resetCard(id, now.time())
+        val list = cacheDataSource.read()
+        val card = list.find { it.same(id) }!!
+        val index = list.indexOf(card)
+        val newCard = card.updateCountStartTime(now.time())
+        list[index] = newCard
+        cacheDataSource.save(list)
     }
 
     override fun newCard(text: String): Card {
+        val list = cacheDataSource.read()
         val id = now.time()
-        cacheDataSource.addCard(id, text)
+        list.add(CardCache(id, id, text))
+        cacheDataSource.save(list)
         return Card.ZeroDays(id, text)
     }
 
     override fun cards(): List<Card> {
-        val cacheList = cacheDataSource.cards()
+        val cacheList = cacheDataSource.read()
         return cacheList.map { it.map(mapper) }
     }
 
     override fun updateCard(id: Long, newText: String) {
-        cacheDataSource.updateCard(id, newText)
+        val list = cacheDataSource.read()
+        val card = list.find { it.same(id) }!!
+        val index = list.indexOf(card)
+        val newCard = card.updateText(newText)
+        list[index] = newCard
+        cacheDataSource.save(list)
     }
 
     override fun deleteCard(id: Long) {
-        cacheDataSource.deleteCard(id)
+        val list = cacheDataSource.read()
+        val card = list.find { it.same(id) }!!
+        list.remove(card)
+        cacheDataSource.save(list)
     }
 }
